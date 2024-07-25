@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible API Example Application</title>
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/scripture.css" rel="stylesheet" />
+    <script src="http://cdn.scripture.api.bible/fums/fumsv2.min.js"></script>
+  </head>
+  <body class="index">
+    <header>
+      <div class="container">
+        <h1>
+          <a class="flex" href="/">
+            <span class="logo" title="American Bible Society">ABS</span>
+            <span>API Demo App</span>
+          </a>
+        </h1>
+      </div>
+    </header>
+    <div class="subheader">
+      <div class="container flex">
+        <div class="subheadings">
+          <h2>Select a</h2>
+          <h3>Bible</h3>
+        </div>
+      </div>
+    </div>
+    <main class="container">
+      <form id="verseForm">
+        <label for="bibleId">Bible ID:</label>
+        <input type="text" id="bibleId" name="bibleId" value="de4e12af7f28f599-02" required>
+        <label for="chapterId">Chapter ID:</label>
+        <input type="text" id="chapterId" name="chapterId" value="GEN.1" required>
+        <button type="submit">Fetch Verses</button>
+      </form>
+      <h4 class="list-heading"><span>Select a Verse</span></h4>
+      <div id="verse-list" class="list-container numeric-list"></div>
+      <div class="eb-container" id="chapter-text"></div>
+    </main>
+    <script src="js/my_key.js"></script>
+    <script>
+        document.getElementById('verseForm').addEventListener('submit', function(event) {
+          event.preventDefault();
+          fetchVerses();
+        });
+      
+        function fetchVerses() {
+          const API_KEY = 'eb4181141bb4d9eb938fafc09bc51aeb';
+          const bibleId = document.getElementById('bibleId').value;
+          const chapterId = document.getElementById('chapterId').value;
+          const versesUrl = `https://api.scripture.api.bible/v1/bibles/${bibleId}/chapters/${chapterId}/verses`;
+          const chapterUrl = `https://api.scripture.api.bible/v1/bibles/${bibleId}/chapters/${chapterId}`;
+      
+          fetch(versesUrl, {
+            method: 'GET',
+            headers: {
+              'api-key': API_KEY
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            const verseList = document.getElementById('verse-list');
+            verseList.innerHTML = '';  // Clear previous content
+      
+            data.data.forEach(verse => {
+              const verseElement = document.createElement('div');
+              verseElement.textContent = `Verse ${verse.reference}`;
+              verseElement.classList.add('verse-item');
+              verseElement.addEventListener('click', () => fetchVerseContent(bibleId, verse.id));
+              verseList.appendChild(verseElement);
+            });
+      
+            // Fetch the full chapter text
+            fetch(chapterUrl, {
+              method: 'GET',
+              headers: {
+                'api-key': API_KEY
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById('chapter-text').innerHTML = data.data.content;
+              if (data.meta.fumsId) {
+                _BAPI.t(data.meta.fumsId);
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching chapter text:', error);
+              document.getElementById('chapter-text').textContent = 'Error fetching chapter text.';
+            });
+      
+          })
+          .catch(error => {
+            console.error('Error fetching verses:', error);
+            document.getElementById('verse-list').textContent = 'Error fetching verses.';
+          });
+        }
+      
+        function fetchVerseContent(bibleId, verseId) {
+          const API_KEY = 'eb4181141bb4d9eb938fafc09bc51aeb';
+          const verseUrl = `https://api.scripture.api.bible/v1/bibles/${bibleId}/verses/${verseId}`;
+      
+          fetch(verseUrl, {
+            method: 'GET',
+            headers: {
+              'api-key': API_KEY
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            const chapterText = document.getElementById('chapter-text');
+            chapterText.innerHTML = data.data.content;
+            if (data.meta.fumsId) {
+              _BAPI.t(data.meta.fumsId);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching verse content:', error);
+            document.getElementById('chapter-text').textContent = 'Error fetching verse content.';
+          });
+        }
+      </script>
+      
+  </body>
+</html>

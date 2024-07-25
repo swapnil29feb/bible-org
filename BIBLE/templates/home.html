@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be Amazing</title>
+    <style>
+        /* Add any specific styles here */
+    </style>
+</head>
+
+<body>
+    <form method="post" action="{{ url_for('home') }}">
+        <div class="container">
+            <div class="header-div-container">
+
+            </div>
+            <div class="body-div-container">
+
+            </div>
+            <div class="footer-div-container">
+
+            </div>
+
+        </div>
+    </form>
+
+    <script>
+        let touchstartX = 0;
+        let touchendX = 0;
+
+        const swipeThreshold = 100; // Minimum distance for a swipe to be registered
+        const container = document.querySelector('.container');
+
+        container.addEventListener('touchstart', function(event) {
+            touchstartX = event.changedTouches[0].screenX;
+        }, false);
+
+        container.addEventListener('touchend', function(event) {
+            touchendX = event.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            if (touchendX < touchstartX - swipeThreshold) {
+                // Left swipe
+                // document.getElementById('right-arrow').click();
+                window.location.href = "{{ url_for('previous') }}"
+            }
+            if (touchendX > touchstartX + swipeThreshold) {
+                // Right swipe
+                // document.getElementById('left-arrow').click();
+                window.location.href = "{{ url_for('refresh') }}"
+            }
+        }
+    </script>
+</body>
+
+</html>
